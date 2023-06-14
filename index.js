@@ -29,12 +29,27 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+
+        const robotCollection = client.db('robotDB').collection('robotes')
+
+        app.get('/robots', async (req, res) => {
+            const categorry = req.query.subCatagory
+            console.log('tabName',categorry)
+            const query = { subCategory: categorry }
+            if (categorry == 'OwnRobots' || categorry == 'RemoteControl' || categorry == 'SmartRobots') {
+                const result = await robotCollection.find(query).toArray()
+                return res.send(result)
+            }
+            const result = await robotCollection.find().toArray()
+            res.send(result)
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
-        await client.close();
+        // await client.close();
     }
 }
 run().catch(console.dir);

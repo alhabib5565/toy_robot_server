@@ -34,7 +34,6 @@ async function run() {
 
         app.get('/robots', async (req, res) => {
             const categorry = req.query.subCatagory
-            console.log('tabName',categorry)
             const query = { subCategory: categorry }
             if (categorry == 'OwnRobots' || categorry == 'RemoteControl' || categorry == 'SmartRobots') {
                 const result = await robotCollection.find(query).toArray()
@@ -44,10 +43,40 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/robot/:id',async (req, res) => {
+        app.get('/robot/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await robotCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.post('/addToy', async (req, res) => {
+            const toy = req.body
+            console.log(toy)
+            const result = await robotCollection.insertOne(toy)
+            res.send(result)
+        })
+
+        app.put('/updateToy/:id',async (req, res) => {
+            const body = req.body
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    toyDetails: body.toyDetails,
+                    availableQuantity: body.availableQuantity,
+                    price: body.price
+                }
+            }
+            const result = await robotCollection.updateOne(filter,updateDoc)
+            res.send(result)
+        })
+
+        app.delete('/robot/:id',async (req, res) => {
+            const id = req.params.id
+            const query = {_id: new ObjectId (id)}
+            const result = await robotCollection.deleteOne(query)
             res.send(result)
         })
 

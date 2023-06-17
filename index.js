@@ -28,9 +28,38 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const robotCollection = client.db('robotDB').collection('robotes')
+
+        const indexKey = {subCategory: 1, toyName:1}
+        const indexOptions = {name: 'nameCategory'}
+        const result = await robotCollection.createIndex(indexKey, indexOptions)
+        console.log(result)
+        
+        app.get('/findJob/:text', async (req, res) => {
+            const text = req.params.text
+            const result = await robotCollection.find({
+                $or: [
+                    {toyName: {$regex: text, $options: 'i'}},
+                    {subCatagory: {$regex: text, $options: 'i'}}
+                ]
+            }).toArray()
+            res.send(result)
+        })
+
+        // app.get("/getJobsByText/:text", async (req, res) => {
+        //     const text = req.params.text;
+        //     const result = await jobsCollection
+        //       .find({
+        //         $or: [
+        //           { title: { $regex: text, $options: "i" } },
+        //           { category: { $regex: text, $options: "i" } },
+        //         ],
+        //       })
+        //       .toArray();
+        //     res.send(result);
+        //   });
 
         app.get('/robots', async (req, res) => {
             const categorry = req.query.subCatagory
@@ -81,7 +110,7 @@ async function run() {
         })
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
